@@ -5,7 +5,7 @@ import mysql from 'mysql2/promise';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const API_KEY = process.env.API_KEY;
 
 const dbConfig = {
@@ -102,6 +102,6 @@ app.get('/api/tipo-cambio/error-404', async (req,res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0',() => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
