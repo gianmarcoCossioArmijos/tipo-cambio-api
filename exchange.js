@@ -5,7 +5,7 @@ import mysql from 'mysql2/promise';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const API_KEY = process.env.API_KEY;
 
 app.use((req, res, next) => {
@@ -81,8 +81,6 @@ async function saveExchangeRates(exchangeData) {
   const [result] = await pool.query(insertQuery, values);
   return result.insertId;
 }
-
-app.use(express.static('public'));
 
 // Endpoint: verificar conexión a base de datos
 app.get('/api/db-health', async (req, res) => {
