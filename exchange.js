@@ -9,10 +9,11 @@ const PORT = process.env.PORT;
 const API_KEY = process.env.API_KEY;
 
 const dbConfig = {
-  host: process.env.MYSQL_HOST || 'localhost',
-  user: process.env.MYSQL_USER || 'root',
-  password: process.env.MYSQL_PASSWORD || '',
-  database: process.env.MYSQL_DATABASE || 'exchangerates_db',
+  host: process.env.MYSQL_HOST,
+  port: process.env.MYSQL_PORT,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
