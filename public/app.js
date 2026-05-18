@@ -1,5 +1,6 @@
 const output = document.getElementById('output');
 const fetchRate = document.getElementById('fetch-rate');
+const fetchDbHealth = document.getElementById('fetch-db-health');
 const fetchError500 = document.getElementById('fetch-error-500');
 const fetchError404 = document.getElementById('fetch-error-404');
 
@@ -17,3 +18,4 @@ const request = async (route) => {
 fetchRate.addEventListener('click', () => request('/api/tipo-cambio'));
 fetchError500.addEventListener('click', () => request('/api/tipo-cambio/error-500'));
 fetchError404.addEventListener('click', () => request('/api/tipo-cambio/error-404'));
+fetchDbHealth.addEventListener('click', () => request('/api/db-health'));
