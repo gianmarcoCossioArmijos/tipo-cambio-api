@@ -21,6 +21,21 @@ const dbConfig = {
 
 const pool = mysql.createPool(dbConfig);
 
+// Test database connection on startup
+pool.getConnection()
+  .then(conn => {
+    console.log('✓ Conexión a MySQL exitosa');
+    conn.release();
+  })
+  .catch(err => {
+    console.error('✗ Error conectando a MySQL:', {
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      error: err.message
+    });
+  });
+
 async function saveExchangeRates(exchangeData) {
   if (!exchangeData || typeof exchangeData !== 'object') {
     throw new Error('Datos de intercambio inválidos');
@@ -61,6 +76,31 @@ async function saveExchangeRates(exchangeData) {
 }
 
 app.use(express.static('public'));
+
+// Endpoint: verificar conexión a base de datos
+app.get('/api/db-health', async (req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    const [result] = await connection.query('SELECT NOW() as timestamp');
+    connection.release();
+    res.json({
+      status: 'ok',
+      message: 'Conexión a MySQL exitosa',
+      timestamp: result[0].timestamp
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Error conectando a MySQL',
+      error: error.message,
+      config: {
+        host: dbConfig.host,
+        port: dbConfig.port,
+        database: dbConfig.database
+      }
+    });
+  }
+});
 
 // Endpoint: obtener tipo de cambio
 app.get('/api/tipo-cambio', async (req,res) => {
