@@ -8,7 +8,18 @@ const request = async (route) => {
   output.textContent = 'Cargando...';
   try {
     const response = await fetch(route);
-    const payload = await response.json();
+    const text = await response.text();
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} ${response.statusText}: ${text}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error(`Respuesta inesperada: content-type=${contentType}\n${text}`);
+    }
+
+    const payload = JSON.parse(text);
     output.textContent = JSON.stringify({ status: response.status, ok: response.ok, body: payload }, null, 2);
   } catch (error) {
     output.textContent = `Error de conexión:\n${error.message}`;
