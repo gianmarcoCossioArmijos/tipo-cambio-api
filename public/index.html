@@ -76,6 +76,10 @@
       <h1>Frontend de Tipo de Cambio</h1>
       <p class="note">Usa los botones para invocar los endpoints del servidor y ver la respuesta JSON.</p>
       <div class="actions">
+        <label>
+          Backend host:
+          <input type="text" id="backend-host" value="http://localhost:3000" placeholder="http://localhost:3000" />
+        </label>
         <button class="primary" id="fetch-rate">Obtener tipo de cambio</button>
         <button class="warning" id="fetch-error-500">Probar error 500</button>
         <button class="error" id="fetch-error-404">Probar error 404</button>

@@ -1,13 +1,20 @@
 const output = document.getElementById('output');
+const backendHostInput = document.getElementById('backend-host');
 const fetchRate = document.getElementById('fetch-rate');
 const fetchDbHealth = document.getElementById('fetch-db-health');
 const fetchError500 = document.getElementById('fetch-error-500');
 const fetchError404 = document.getElementById('fetch-error-404');
 
+const getBackendBase = () => {
+  const value = backendHostInput.value.trim();
+  return value ? value.replace(/\/$/, '') : window.location.origin;
+};
+
 const request = async (route) => {
   output.textContent = 'Cargando...';
   try {
-    const response = await fetch(route);
+    const backendBase = getBackendBase();
+    const response = await fetch(`${backendBase}${route}`);
     const text = await response.text();
 
     if (!response.ok) {
