@@ -1,11 +1,65 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import axios from 'axios';
+import mysql from 'mysql2/promise';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.API_KEY;
+
+const dbConfig = {
+  host: process.env.MYSQL_HOST || 'localhost',
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || '',
+  database: process.env.MYSQL_DATABASE || 'exchangerates_db',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
+
+const pool = mysql.createPool(dbConfig);
+
+async function saveExchangeRates(exchangeData) {
+  if (!exchangeData || typeof exchangeData !== 'object') {
+    throw new Error('Datos de intercambio inválidos');
+  }
+
+  const {
+    base_code,
+    time_last_update_unix,
+    time_next_update_unix,
+    time_last_update_utc,
+    time_next_update_utc,
+    conversion_rates
+  } = exchangeData;
+
+  const currencyCode = base_code || 'USD';
+  const ratesJson = JSON.stringify(conversion_rates || {});
+
+  const insertQuery = `
+    INSERT INTO exchange_rates
+    (currency_code, base_code, rates, time_last_update_unix,
+    time_next_update_unix, time_last_update_utc, time_next_update_utc)
+    VALUES
+    (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    currencyCode,
+    base_code || 'USD',
+    ratesJson,
+    time_last_update_unix || null,
+    time_next_update_unix || null,
+    time_last_update_utc ? new Date(time_last_update_utc) : null,
+    time_next_update_utc ? new Date(time_next_update_utc) : null
+  ];
+
+  const [result] = await pool.query(insertQuery, values);
+  return result.insertId;
+}
+
+app.use(express.static('public'));
 
 // Endpoint: obtener tipo de cambio
 app.get('/api/tipo-cambio', async (req,res) => {
@@ -15,7 +69,12 @@ app.get('/api/tipo-cambio', async (req,res) => {
     const data = response.data;
 
     if (response.data.result === "success") {
-      res.json({data});
+      try {
+        const insertedId = await saveExchangeRates(data);
+        res.json({ data, savedId: insertedId });
+      } catch (dbError) {
+        res.status(500).json({ error: "Error guardando los datos en la base de datos", detalle: dbError.message });
+      }
     } else {
       res.status(500).json({error: "Error en la API Exchange Rate"});
     }
